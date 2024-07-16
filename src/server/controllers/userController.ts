@@ -1,62 +1,23 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { userService } from '../services/UserService';
+import { controllerAction } from '../utility';
+import { userService } from '../services/userService';
 
 export const userController = {
-  async createUser(req: NextApiRequest, res: NextApiResponse) {
-    try {
-      const {
-        uid,
-        phoneNumber,
-        alternatePhoneNumber,
-        isNewUser,
-        email,
-        name,
-        age,
-        firmName,
-        firmAddress,
-        HomeAddress,
-        taluk,
-        district,
-        state,
-        FatherName,
-        MotherName,
-        HusbandName,
-      } = req.body;
-      const user = await userService.createUser({
-        uid,
-        phoneNumber,
-        alternatePhoneNumber,
-        isNewUser,
-        email,
-        name,
-        age,
-        firmName,
-        firmAddress,
-        HomeAddress,
-        taluk,
-        district,
-        state,
-        FatherName,
-        MotherName,
-        HusbandName,
-      });
+  createUser: controllerAction(
+    async (req: NextApiRequest, res: NextApiResponse) => {
+      const user = await userService.createUser(req.body);
       res.status(201).json(user);
-    } catch (error) {
-      console.error('Error creating user:', error);
-      res.status(500).json({ error: 'Error creating user' });
     }
-  },
+  ),
 
-  async getUser(req: NextApiRequest, res: NextApiResponse, userId: string) {
-    try {
-      const user = await userService.getUserById(userId);
+  getUser: controllerAction(
+    async (req: NextApiRequest, res: NextApiResponse) => {
+      const { userId } = req.query;
+      const user = await userService.getUserById(userId as string);
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
       res.status(200).json(user);
-    } catch (error) {
-      console.error('Error getting user:', error);
-      res.status(500).json({ error: 'Error getting user' });
     }
-  },
+  ),
 };
