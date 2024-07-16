@@ -1,11 +1,9 @@
 import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
-import NextAuth, { RequestInternal, User, AuthOptions } from 'next-auth';
+import NextAuth, { User, AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import FirestoreAdapter from '@/lib/FirestoreAdapter';
+import { firestore } from 'firebase-admin';
 
 export const authOptions: AuthOptions = {
-  adapter: FirestoreAdapter(),
   providers: [
     CredentialsProvider({
       id: 'firebase-phone',
@@ -17,57 +15,41 @@ export const authOptions: AuthOptions = {
       authorize: async (
         credentials: Record<'idToken', string> | undefined
       ): Promise<User | null> => {
-        console.log('\n\n================authorize============\n\n');
-
         if (!credentials) return null;
         const { idToken } = credentials;
         if (!idToken) return null;
-
         try {
           const decodedToken = await getAuth().verifyIdToken(idToken);
-          const uid = decodedToken.uid;
-          // const db = getFirestore();
-          // console.log('\n\n================calling firestore============\n\n');
+          const userId = decodedToken.uid;
 
-          // const userDoc = await db.collection('users').doc(uid).get();
+          // Check if the user exists in your Firestore database
+          const userDoc = await firestore()
+            .collection('users')
+            .doc(userId)
+            .get();
 
-          // let user: User;
+          if (!userDoc.exists) {
+            // If the user doesn't exist, throw an error to redirect to sign-up
+            throw new Error('NEW_USER');
+          }
 
-          // if (userDoc.exists) {
-          //   console.log('\n\n================User exists============\n\n');
-
-          //   // User exists, return user data
-          //   const userData = userDoc.data() as Omit<User, 'id'>;
-          //   user = {
-          //     id: uid,
-          //     ...userData,
-          //   };
-          // } else {
-          //   // New user, return basic info
-          //   console.log('\n\n================User not exists============\n\n');
-
-          //   user = {
-          //     id: uid,
-          //     name: null,
-          //     email: null,
-          //     image: null,
-          //   };
-          // }
-
-          // console.log('\n\n================User============\n\n', user);
-
+          const userData = userDoc.data();
           const user = {
-            id: uid,
-            name: null,
-            email: null,
-            image: null,
+            id: userId,
             phoneNumber: decodedToken.phone_number,
-            isNewUser: true,
-          };
-
+            name: userData?.name,
+            email: userData?.email,
+            address: userData?.address,
+            age: userData?.age,
+            exp: decodedToken.exp, // Add the expiration time from the token
+          } as User;
           return user;
         } catch (error) {
           console.error('Error in authorization:', error);
+          if (error instanceof Error && error.message === 'NEW_USER') {
+            // Rethrow the error to be caught by NextAuth
+            throw error;
+          }
           return null;
         }
       },
@@ -75,15 +57,22 @@ export const authOptions: AuthOptions = {
   ],
   pages: {
     signIn: '/',
+    newUser: '/signup',
   },
   session: {
     strategy: 'jwt',
+    maxAge: 60 * 60, // 1 hour default
   },
   callbacks: {
     async jwt({ token, user }: { token: any; user: any }) {
       if (user) {
         token.id = user.id;
         token.phoneNumber = user.phoneNumber;
+        token.name = user.name;
+        token.email = user.email;
+        token.address = user.address;
+        token.age = user.age;
+        token.exp = user.exp; // Set the expiration time in the token
       }
       return token;
     },
@@ -91,7 +80,17 @@ export const authOptions: AuthOptions = {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.phoneNumber = token.phoneNumber as string;
+        session.user.name = token.name as string;
+        session.user.email = token.email as string;
+        session.user.address = token.address as string;
+        session.user.age = token.age as number;
       }
+
+      // Set the session expiry based on the token expiration
+      if (token.exp) {
+        session.expires = new Date(token.exp * 1000).toISOString();
+      }
+
       return session;
     },
   },
