@@ -6,10 +6,11 @@ export const userService = {
     userData: Omit<IdpwaUser, 'id' | 'createdAt' | 'updatedAt'>
   ): Promise<IdpwaUser> {
     const userRef = db.collection('users').doc(userData.phoneNumber);
+    const timestamp = admin.firestore.FieldValue.serverTimestamp();
     const newUser = {
       ...userData,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: timestamp,
+      updatedAt: timestamp,
     };
     await userRef.set(newUser);
     return newUser as IdpwaUser;
@@ -17,9 +18,7 @@ export const userService = {
 
   async getUserById(userId: string): Promise<IdpwaUser | null> {
     const userDoc = await db.collection('users').doc(userId).get();
-    if (!userDoc.exists) {
-      return null;
-    }
+    if (!userDoc.exists) return null;
     return userDoc.data() as IdpwaUser;
   },
 };
