@@ -90,7 +90,6 @@ export const authOptions: AuthOptions = {
       if (token.exp) {
         session.expires = new Date(token.exp * 1000).toISOString();
       }
-
       return session;
     },
   },

@@ -11,14 +11,20 @@ export const sendErrorResponse = (
 };
 
 // Higher-order function for wrapping controller actions
-export const controllerAction = (
-  action: (req: NextApiRequest, res: NextApiResponse) => Promise<void>
-) => {
-  return async (req: NextApiRequest, res: NextApiResponse) => {
+// Assuming controllerAction is defined in a utility file
+export function controllerAction<T extends any[]>(
+  action: (
+    req: NextApiRequest,
+    res: NextApiResponse,
+    ...args: T
+  ) => Promise<void>
+) {
+  return async (req: NextApiRequest, res: NextApiResponse, ...args: T) => {
     try {
-      await action(req, res);
+      await action(req, res, ...args);
     } catch (error) {
-      sendErrorResponse(res, error, 'An error occurred');
+      console.error(error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   };
-};
+}
