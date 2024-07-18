@@ -1,7 +1,7 @@
 import { Address } from '@/types/common';
 
 export default interface IdpwaUser {
-  uid: string;
+  id: string;
   phoneNumber: string;
   alternatePhoneNumber?: string;
   isNewUser: boolean;

@@ -13,9 +13,7 @@ export const userController = {
   getUser: controllerAction(
     async (req: NextApiRequest, res: NextApiResponse, userId: string) => {
       const user = await userService.getUserById(userId as string);
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
-      }
+      if (!user) return res.status(404).json({ error: 'User not found' });
       res.status(200).json(user);
     }
   ),

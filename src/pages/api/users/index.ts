@@ -13,11 +13,11 @@ export default async function handler(
   await authMiddleware(req, res, async () => {
     const session = await getServerSession(req, res, authOptions);
     switch (req.method) {
-      case 'POST':
-        return userController.createUser(req, res);
+      // case 'POST':
+      //   return userController.createUser(req, res);
       case 'GET':
-        console.log(session?.user);
-
+        if (!session?.user?.id)
+          return res.status(401).json({ error: 'Unauthorized' });
         return userController.getUser(req, res, session?.user?.id);
       default:
         res.setHeader('Allow', ['POST', 'GET']);

@@ -10,12 +10,14 @@ import {
   InputOTPSlot,
 } from '../ui/input-otp';
 import { signOut, useSession } from 'next-auth/react';
+import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 
 const SignIn = () => {
   const {
     phoneNumber,
     verificationId,
     otp,
+    error,
     phoneNumberChange,
     generateOTP,
     otpChange,
@@ -29,11 +31,19 @@ const SignIn = () => {
       </div>
     );
   return (
-    <div className='flex flex-col gap-6'>
+    <div className='flex flex-col gap-4 items-center'>
+      {error && (
+        <Alert variant='destructive'>
+          <AlertTitle>{error}</AlertTitle>
+          <AlertDescription>
+            User doesn&apos;t exist. Please sign up first.
+          </AlertDescription>
+        </Alert>
+      )}
       <div id='recaptcha-container'></div>
       {verificationId ? (
         <>
-          <div className='grid w-full max-w-sm items-center gap-1.5'>
+          <div className='grid w-full max-w-sm items-center gap-5'>
             <Label htmlFor='picture'>Phone Number</Label>
             <InputOTP maxLength={6} value={otp} onChange={otpChange}>
               <InputOTPGroup>
@@ -57,7 +67,7 @@ const SignIn = () => {
         </>
       ) : (
         <>
-          <div className='grid w-full max-w-sm items-center gap-1.5'>
+          <div className='grid w-full max-w-sm items-center gap-4'>
             <Label htmlFor='picture'>Phone Number</Label>
             <Input
               className='min-w-96 text-gray-500'

@@ -8,6 +8,7 @@ import {
 } from 'firebase/auth';
 import { app, firebaseConfig } from '@/lib/firebase';
 import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/router';
 
 declare global {
   interface Window {
@@ -16,6 +17,7 @@ declare global {
 }
 
 const useSignInHook = () => {
+  const { replace } = useRouter();
   const [phoneNumber, setPhoneNumber] = useState('+91');
   const [error, setError] = useState('');
   const [verificationId, setVerificationId] = useState('');
@@ -32,8 +34,7 @@ const useSignInHook = () => {
   const otpChange = (value: string) => setOtp(value);
 
   const generateOTP = async () => {
-    console.log('firebaseConfig', firebaseConfig);
-
+    setError('');
     if (/^\+\d{12}$/.test(phoneNumber)) {
       const auth = getAuth();
       const appVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
@@ -53,9 +54,7 @@ const useSignInHook = () => {
           setVerificationId(confirmationResult.verificationId);
           setConfirmationResult(confirmationResult);
         }
-      } catch (error) {
-        console.log('error', error);
-      }
+      } catch (error) {}
     } else {
       setError('Invalid phone number');
     }
@@ -63,21 +62,25 @@ const useSignInHook = () => {
 
   const confirmOtp = async () => {
     if (!verificationId) return;
-    if (otp && otp.length === 6) {
-      const credential = await confirmationResult?.confirm(otp);
+    try {
+      if (otp && otp.length === 6) {
+        const credential = await confirmationResult?.confirm(otp);
 
-      const idToken = await credential?.user.getIdToken();
-      console.log('idToken', idToken);
+        const idToken = await credential?.user.getIdToken();
+        console.log('idToken', idToken);
 
-      const result = await signIn('firebase-phone', {
-        idToken,
-        redirect: false,
-      });
+        const result = await signIn('firebase-phone', {
+          idToken,
+          redirect: false,
+        });
+        if (result?.error) {
+          setError("User doesn't exist");
+        }
+        console.log('result', result);
 
-      console.log('result', result);
-
-      console.log('credential', credential);
-    }
+        console.log('credential', credential);
+      }
+    } catch (error) {}
   };
 
   return {

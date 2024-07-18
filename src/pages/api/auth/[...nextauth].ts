@@ -92,6 +92,13 @@ export const authOptions: AuthOptions = {
       }
       return session;
     },
+    signIn: async ({ user, account, profile }) => {
+      try {
+        return true;
+      } catch (error) {
+        return '/auth/error?error=User is not registered';
+      }
+    },
   },
 };
 
