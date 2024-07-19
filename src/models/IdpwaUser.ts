@@ -4,6 +4,7 @@ export default interface IdpwaUser {
   id: string;
   phoneNumber: string;
   alternatePhoneNumber?: string;
+  whatsappNumber?: string;
   isNewUser: boolean;
   email: string;
   name?: string;
