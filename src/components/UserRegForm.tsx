@@ -39,7 +39,7 @@ const UserRegForm = (props: Props) => {
             </div>
           </div>
           <div>
-            <Label>Gender</Label>npx shadcn-ui@latest add calendar
+            <Label>Gender</Label>
 
             <SelectGender />
           </div>

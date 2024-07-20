@@ -19,7 +19,7 @@ const Navbar = (props: Props) => {
         </div>
         <div className='flex'>
           <Link href='/'>
-            <Button className='bg-blue-500 hover:bg-blue-600'>Sign In</Button>
+            <Button className='bg-red-600 hover:bg-red-500'>Sign Out</Button>
           </Link>
         </div>
       </div>
