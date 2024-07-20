@@ -30,7 +30,11 @@ export const authOptions: AuthOptions = {
 
           if (!userDoc.exists) {
             // If the user doesn't exist, throw an error to redirect to sign-up
-            throw new Error('NEW_USER');
+            return {
+              id: decodedToken.uid,
+              phoneNumber: decodedToken.phone_number,              isNewUser: true,
+
+            } as User;
           }
 
           const userData = userDoc.data();

@@ -1,4 +1,5 @@
 import Navbar from '@/components/common/Navbar';
+import UserRegForm from '@/components/UserRegForm';
 import React from 'react';
 
 const SignUp = () => {
@@ -10,7 +11,7 @@ const SignUp = () => {
           <h1 className='text-3xl font-bold capitalize'>
             Membership registration form
           </h1>
-          <div className=''>dd</div>
+          <UserRegForm />
         </div>
       </div>
     </div>

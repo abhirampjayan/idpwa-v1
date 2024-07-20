@@ -71,7 +71,6 @@ const useSignInHook = () => {
 
         const result = await signIn('firebase-phone', {
           idToken,
-          redirect: false,
         });
         if (result?.error) {
           setError("User doesn't exist");
