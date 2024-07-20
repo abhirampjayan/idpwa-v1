@@ -13,7 +13,6 @@ type Props = {};
 const UserRegForm = (props: Props) => {
   return (
     <div className='flex flex-col gap-8 mb-12'>
-
       <div className='flex flex-col gap-4 '>
         <h2 className='text-2xl'>Personal Details</h2>
         <Card className='grid p-8 grid-cols-3 gap-4'>
