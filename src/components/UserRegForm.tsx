@@ -12,7 +12,7 @@ type Props = {};
 
 const UserRegForm = (props: Props) => {
   return (
-    <div className='flex flex-col gap-8 mb-12'>npx shadcn-ui@latest add calendar
+    <div className='flex flex-col gap-8 mb-12'>
 
       <div className='flex flex-col gap-4 '>
         <h2 className='text-2xl'>Personal Details</h2>
