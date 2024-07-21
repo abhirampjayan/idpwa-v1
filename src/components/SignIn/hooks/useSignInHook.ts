@@ -2,11 +2,10 @@ import { useState } from 'react';
 import {
   ConfirmationResult,
   getAuth,
-  PhoneAuthProvider,
   RecaptchaVerifier,
   signInWithPhoneNumber,
 } from 'firebase/auth';
-import { app, firebaseConfig } from '@/lib/firebase';
+import { app, auth, firebaseConfig } from '@/lib/firebase';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/router';
 
@@ -36,13 +35,15 @@ const useSignInHook = () => {
   const generateOTP = async () => {
     setError('');
     if (/^\+\d{12}$/.test(phoneNumber)) {
-      const auth = getAuth();
+      // const auth = getAuth();
       const appVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         size: 'invisible',
         callback: (response: any) => {
           console.log('response', response);
         },
       });
+
+
 
       try {
         const confirmationResult = await signInWithPhoneNumber(
@@ -71,6 +72,7 @@ const useSignInHook = () => {
 
         const result = await signIn('firebase-phone', {
           idToken,
+          redirect: false,
         });
         if (result?.error) {
           setError("User doesn't exist");

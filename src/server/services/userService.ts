@@ -11,9 +11,9 @@ export const userService = {
       ...userData,
       createdAt: timestamp,
       updatedAt: timestamp,
-    };
+    } as unknown as IdpwaUser;
     await userRef.set(newUser);
-    return newUser as IdpwaUser;
+    return newUser;
   },
 
   async getUserById(userId: string): Promise<IdpwaUser | null> {
