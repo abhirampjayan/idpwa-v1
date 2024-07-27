@@ -6,6 +6,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/router';
 
 declare global {
   interface Window {
@@ -20,6 +21,10 @@ const useSignInHook = () => {
   const [otp, setOtp] = useState<string>();
   const [recaptchaVerifier, setRecaptchaVerifier] =
     useState<RecaptchaVerifier>();
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [validatingPhone, setValidatingPhone] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     const appVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
@@ -47,6 +52,7 @@ const useSignInHook = () => {
   const generateOTP = async () => {
     setError('');
     if (/^\+\d{12}$/.test(phoneNumber)) {
+      setValidatingPhone(true);
       try {
         if (!recaptchaVerifier) return;
         const confirmationResult = await signInWithPhoneNumber(
@@ -58,8 +64,9 @@ const useSignInHook = () => {
           setVerificationId(confirmationResult.verificationId);
           setConfirmationResult(confirmationResult);
         }
+        setValidatingPhone(false);
       } catch (error) {
-        console.log('error', error);
+        setValidatingPhone(false);
       }
     } else {
       setError('Invalid phone number');
@@ -70,21 +77,24 @@ const useSignInHook = () => {
     if (!verificationId) return;
     try {
       if (otp && otp.length === 6) {
+        setIsVerifyingOtp(true);
         const credential = await confirmationResult?.confirm(otp);
-
         const idToken = await credential?.user.getIdToken();
-        console.log('idToken', idToken);
-
-        const result = await signIn('firebase-phone', {
+        const response = await signIn('firebase-phone', {
           idToken,
           redirect: false,
         });
-        if (result?.error) {
-          console.log('error', result.error);
-          setError("User doesn't exist");
+        if (response?.ok) {
+          const isNewUser = response.url?.includes('isNewUser=true');
+          if (isNewUser) router.push('/register');
+          else router.push('/dashboard'); // or wherever you want to redirect existing users
         }
+        if (response?.error) setError("User doesn't exist");
+        setIsVerifyingOtp(false);
       }
-    } catch (error) {}
+    } catch (error) {
+      setIsVerifyingOtp(false);
+    }
   };
 
   return {
@@ -92,6 +102,8 @@ const useSignInHook = () => {
     error,
     verificationId,
     otp,
+    validatingPhone,
+    isVerifyingOtp,
     phoneNumberChange,
     generateOTP,
     otpChange,

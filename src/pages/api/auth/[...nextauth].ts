@@ -30,9 +30,9 @@ export const authOptions: AuthOptions = {
             .get();
 
           if (!userDoc.exists) {
-            // If the user doesn't exist, throw an error to redirect to sign-up
+            // If the user doesn't exist, return a user object with isNewUser flag
             return {
-              id: decodedToken.uid,
+              id: userId,
               phoneNumber: decodedToken.phone_number,
               isNewUser: true,
             } as User;
@@ -47,16 +47,13 @@ export const authOptions: AuthOptions = {
             email: userData?.email,
             address: userData?.address,
             age: userData?.age,
-            exp: decodedToken.exp, // Add the expiration time from the token
+            exp: decodedToken.exp,
+            isNewUser: false,
           } as User;
 
           return user;
         } catch (error) {
           console.error('Error in authorization:', error);
-          if (error instanceof Error && error.message === 'NEW_USER') {
-            // Rethrow the error to be caught by NextAuth
-            throw error;
-          }
           return null;
         }
       },
@@ -64,7 +61,6 @@ export const authOptions: AuthOptions = {
   ],
   pages: {
     signIn: '/',
-    // newUser: '/signup',
   },
   session: {
     strategy: 'jwt',
@@ -79,7 +75,8 @@ export const authOptions: AuthOptions = {
         token.email = user.email;
         token.address = user.address;
         token.age = user.age;
-        token.exp = user.exp; // Set the expiration time in the token
+        token.exp = user.exp;
+        token.isNewUser = user.isNewUser;
       }
       return token;
     },
@@ -91,21 +88,25 @@ export const authOptions: AuthOptions = {
         session.user.email = token.email as string;
         session.user.address = token.address as string;
         session.user.age = token.age as number;
+        session.user.isNewUser = token.isNewUser as boolean;
       }
 
-      // Set the session expiry based on the token expiration
       if (token.exp) {
         session.expires = new Date(token.exp * 1000).toISOString();
       }
       return session;
     },
-    // signIn: async ({ user, account, profile }) => {
-    //   try {
-    //     return true;
-    //   } catch (error) {
-    //     return '/auth/error?error=User is not registered';
-    //   }
-    // },
+    async redirect({ url, baseUrl }) {
+      // If the user is new, redirect to the register page
+      if (url.startsWith(baseUrl)) {
+        const urlObj = new URL(url);
+        const isNewUser = urlObj.searchParams.get('isNewUser');
+        if (isNewUser === 'true') {
+          return `${baseUrl}/register`;
+        }
+      }
+      return url;
+    },
   },
 };
 

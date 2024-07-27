@@ -11,6 +11,7 @@ import {
 } from '../ui/input-otp';
 import { signOut, useSession } from 'next-auth/react';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import { Loader2 } from 'lucide-react';
 
 const SignIn = () => {
   const {
@@ -18,6 +19,8 @@ const SignIn = () => {
     verificationId,
     otp,
     error,
+    isVerifyingOtp,
+    validatingPhone,
     phoneNumberChange,
     generateOTP,
     otpChange,
@@ -60,8 +63,17 @@ const SignIn = () => {
             </InputOTP>
           </div>
           <div className='grid w-full max-w-sm items-center gap-1.5'>
-            <Button size='lg' type='button' onClick={confirmOtp}>
-              Confrim OTP
+            <Button
+              size='lg'
+              type='button'
+              onClick={confirmOtp}
+              disabled={isVerifyingOtp}
+            >
+              {isVerifyingOtp ? (
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+              ) : (
+                'Confrim OTP'
+              )}
             </Button>
           </div>
         </>
@@ -78,8 +90,17 @@ const SignIn = () => {
             />
           </div>
           <div className='grid w-full max-w-sm items-center gap-1.5'>
-            <Button size='lg' type='button' onClick={generateOTP}>
-              Generate OTP
+            <Button
+              size='lg'
+              type='button'
+              onClick={generateOTP}
+              disabled={validatingPhone}
+            >
+              {validatingPhone ? (
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+              ) : (
+                'Generate OTP'
+              )}
             </Button>
           </div>
         </>
