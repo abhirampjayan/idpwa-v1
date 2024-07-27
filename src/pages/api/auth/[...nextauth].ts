@@ -1,7 +1,7 @@
 import { getAuth } from 'firebase-admin/auth';
 import NextAuth, { User, AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { firestore } from 'firebase-admin';
+import admin from '@/lib/firebase-auth';
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -19,11 +19,12 @@ export const authOptions: AuthOptions = {
         const { idToken } = credentials;
         if (!idToken) return null;
         try {
-          const decodedToken = await getAuth().verifyIdToken(idToken);
+          const decodedToken = await admin.auth().verifyIdToken(idToken);
           const userId = decodedToken.uid;
 
           // Check if the user exists in your Firestore database
-          const userDoc = await firestore()
+          const userDoc = await admin
+            .firestore()
             .collection('users')
             .doc(userId)
             .get();
@@ -32,12 +33,13 @@ export const authOptions: AuthOptions = {
             // If the user doesn't exist, throw an error to redirect to sign-up
             return {
               id: decodedToken.uid,
-              phoneNumber: decodedToken.phone_number,              isNewUser: true,
-
+              phoneNumber: decodedToken.phone_number,
+              isNewUser: true,
             } as User;
           }
 
           const userData = userDoc.data();
+
           const user = {
             id: userId,
             phoneNumber: decodedToken.phone_number,
@@ -47,6 +49,7 @@ export const authOptions: AuthOptions = {
             age: userData?.age,
             exp: decodedToken.exp, // Add the expiration time from the token
           } as User;
+
           return user;
         } catch (error) {
           console.error('Error in authorization:', error);
@@ -61,7 +64,7 @@ export const authOptions: AuthOptions = {
   ],
   pages: {
     signIn: '/',
-    newUser: '/signup',
+    // newUser: '/signup',
   },
   session: {
     strategy: 'jwt',
@@ -96,13 +99,13 @@ export const authOptions: AuthOptions = {
       }
       return session;
     },
-    signIn: async ({ user, account, profile }) => {
-      try {
-        return true;
-      } catch (error) {
-        return '/auth/error?error=User is not registered';
-      }
-    },
+    // signIn: async ({ user, account, profile }) => {
+    //   try {
+    //     return true;
+    //   } catch (error) {
+    //     return '/auth/error?error=User is not registered';
+    //   }
+    // },
   },
 };
 

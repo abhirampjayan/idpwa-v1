@@ -1,10 +1,7 @@
 import { initFirestore } from '@auth/firebase-adapter';
-import { cert, getApp } from 'firebase-admin/app';
+import { cert } from 'firebase-admin/app';
 import * as admin from 'firebase-admin';
 
-const privateKey = process.env.AUTH_FIREBASE_PRIVATE_KEY
-  ? process.env.AUTH_FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
-  : undefined;
 // Ensure all required environment variables are set
 const requiredEnvVars = [
   'AUTH_FIREBASE_PROJECT_ID',
@@ -18,7 +15,11 @@ requiredEnvVars.forEach((varName) => {
   }
 });
 
-if (admin.apps.length) {
+const privateKey = process.env.AUTH_FIREBASE_PRIVATE_KEY
+  ? process.env.AUTH_FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+  : undefined;
+
+if (!admin.apps.length) {
   try {
     admin.initializeApp({
       credential: cert({
@@ -27,8 +28,10 @@ if (admin.apps.length) {
         privateKey,
       }),
     });
+    console.log('Firebase Admin initialized successfully');
   } catch (error) {
-    console.log('Firebase admin initialization error', error);
+    console.error('Firebase admin initialization error', error);
+    throw error; // Re-throw the error to prevent the app from starting with incorrect Firebase setup
   }
 }
 

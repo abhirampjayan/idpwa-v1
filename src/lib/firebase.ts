@@ -20,9 +20,14 @@ export const firebaseConfig: FirebaseConfig = {
   appId: process.env.NEXT_PUBLIC_APP_ID || '',
   measurementId: process.env.NEXT_PUBLIC_MEASUREMENT_ID || '',
 };
+console.log(firebaseConfig);
+console.log(getApps().length);
 
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+let app;
+
+if (!getApps().length) app = initializeApp(firebaseConfig);
+else app = getApps()[0];
+
 const auth = getAuth(app);
 
 export { app, auth };
-
