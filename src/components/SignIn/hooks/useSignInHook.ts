@@ -1,13 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ConfirmationResult,
-  getAuth,
   RecaptchaVerifier,
   signInWithPhoneNumber,
 } from 'firebase/auth';
-import { app, auth, firebaseConfig } from '@/lib/firebase';
+import { auth } from '@/lib/firebase';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/router';
 
 declare global {
   interface Window {
@@ -16,11 +14,25 @@ declare global {
 }
 
 const useSignInHook = () => {
-  const { replace } = useRouter();
   const [phoneNumber, setPhoneNumber] = useState('+91');
   const [error, setError] = useState('');
   const [verificationId, setVerificationId] = useState('');
   const [otp, setOtp] = useState<string>();
+  const [recaptchaVerifier, setRecaptchaVerifier] =
+    useState<RecaptchaVerifier>();
+
+  useEffect(() => {
+    const appVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+      size: 'invisible',
+      callback: (response: any) => {
+        console.log('response', response);
+      },
+      'expired-callback': () => {
+        console.log('expired-callback');
+      },
+    });
+    setRecaptchaVerifier(appVerifier);
+  }, []);
 
   const [confirmationResult, setConfirmationResult] =
     useState<ConfirmationResult | null>(null);
@@ -35,27 +47,20 @@ const useSignInHook = () => {
   const generateOTP = async () => {
     setError('');
     if (/^\+\d{12}$/.test(phoneNumber)) {
-      // const auth = getAuth();
-      const appVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        size: 'invisible',
-        callback: (response: any) => {
-          console.log('response', response);
-        },
-      });
-
-
-
       try {
+        if (!recaptchaVerifier) return;
         const confirmationResult = await signInWithPhoneNumber(
           auth,
           phoneNumber,
-          appVerifier
+          recaptchaVerifier
         );
         if (confirmationResult.verificationId) {
           setVerificationId(confirmationResult.verificationId);
           setConfirmationResult(confirmationResult);
         }
-      } catch (error) {}
+      } catch (error) {
+        console.log('error', error);
+      }
     } else {
       setError('Invalid phone number');
     }
@@ -75,11 +80,9 @@ const useSignInHook = () => {
           redirect: false,
         });
         if (result?.error) {
+          console.log('error', result.error);
           setError("User doesn't exist");
         }
-        console.log('result', result);
-
-        console.log('credential', credential);
       }
     } catch (error) {}
   };
