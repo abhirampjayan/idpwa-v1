@@ -4,6 +4,7 @@ import SignIn from '@/components/SignIn';
 import { GetServerSideProps } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from './api/auth/[...nextauth]';
+import IDPWALogo from '@/components/common/IDPWALogo';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -43,8 +44,12 @@ export default function Home() {
             className='object-cover'
           />
         </div>
-        <div className='flex flex-col justify-center items-center gap-8 p-8'>
-          <h1 className='text-4xl capitalize font-bold'>Sign In</h1>
+        <div className='flex flex-col justify-center items-center gap-4 p-8'>
+          <div className='text-5xl flex font-bold items-center gap-'>
+            <IDPWALogo />
+            <span>IDPWA</span>
+          </div>
+          <h1 className='text-3xl capitalize font-bold'>Sign In</h1>
           <SignIn />
         </div>
       </div>
