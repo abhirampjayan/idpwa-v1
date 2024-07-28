@@ -9,10 +9,8 @@ import DatePicker from '../DatePicker';
 import SelectGender from '../SelectGender';
 import SelectBloodGroup from '../SelectBloodGroup';
 import { RegisterPageProps } from './types';
-import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 
 const UserRegForm = ({ phoneNumber }: RegisterPageProps) => {
-  
   return (
     <div className='flex flex-col gap-8 mb-12'>
       <div className='flex flex-col gap-4 '>
