@@ -5,6 +5,7 @@ import { authOptions } from '../api/auth/[...nextauth]';
 
 type Props = {
   // Define any props you want to pass to the component
+  user: string;
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -38,13 +39,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     props: {
       // Pass any data you want to the component as props
       // For example, you might want to pass some session data
-      user: session.user,
+      user: session.user.name,
     },
   };
 };
 
 const ProtectedPage = (props: Props) => {
-  return <div>Protected Page Content</div>;
+  return <div className='bg-red-300'></div>;
 };
 
 export default ProtectedPage;

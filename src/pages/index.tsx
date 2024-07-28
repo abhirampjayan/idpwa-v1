@@ -12,11 +12,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   if (!session)
     return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
+      props: {},
     };
+
   if (!session.user?.isNewUser)
     return {
       redirect: {
