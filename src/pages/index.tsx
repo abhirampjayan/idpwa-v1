@@ -1,8 +1,37 @@
 import Image from 'next/image';
 import { Inter } from 'next/font/google';
 import SignIn from '@/components/SignIn';
+import { GetServerSideProps } from 'next';
+import { getServerSession } from 'next-auth';
+import { authOptions } from './api/auth/[...nextauth]';
 
 const inter = Inter({ subsets: ['latin'] });
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await getServerSession(context.req, context.res, authOptions);
+
+  if (!session)
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      },
+    };
+  if (!session.user?.isNewUser)
+    return {
+      redirect: {
+        destination: '/dashboard',
+        permanent: false,
+      },
+    };
+  else
+    return {
+      redirect: {
+        destination: '/register',
+        permanent: false,
+      },
+    };
+};
 
 export default function Home() {
   return (
